@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shakti Tantra enterprise dashboard</title>
+<link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
+<script>/*__BOOT__*/</script>
+<style>
+  :root {
+    --accent: #2563eb; --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2430; --muted: #5d6877; --line: #e3e7ec;
+    --soft: #f0f3f6; --ok: #15803d; --warn: #b45309; --bad: #b91c1c; --chip: #eef2f6;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1419; --panel: #171d24; --ink: #e6ebf0; --muted: #9aa6b2; --line: #2a333d; --soft: #1d242c;
+            --chip: #222b35; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--panel); border-bottom: 3px solid var(--accent); box-shadow: var(--shadow); }
+  .bar { max-width: 1280px; margin: 0 auto; padding: 14px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .logo { width: 46px; height: 46px; border-radius: 10px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 18px; letter-spacing: .5px; }
+  .title h1 { margin: 0; font-size: 20px; }
+  .eco { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .eco b { color: var(--accent); }
+  .eco a { color: inherit; }
+  .eco-mark { height: 18px; width: auto; vertical-align: -5px; margin-right: 7px; }
+  .title p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .chip { background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: 12px; color: var(--muted); }
+  .chip b { color: var(--ink); font-weight: 600; }
+  .right { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, button, textarea { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 10px; }
+  textarea { width: 100%; resize: vertical; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--ok); margin-right: 6px; }
+  .dot.down { background: var(--bad); }
+  nav { max-width: 1280px; margin: 0 auto; padding: 0 20px; display: flex; gap: 4px; overflow-x: auto; }
+  nav button { border: 0; border-radius: 0; background: none; padding: 10px 14px; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  main { max-width: 1280px; margin: 0 auto; padding: 18px 20px 40px; }
+  .grid { display: grid; gap: 14px; }
+  .kpis { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+  .kpi .label { color: var(--muted); font-size: 12px; }
+  .kpi .value { font-size: 18px; font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  h2 { font-size: 15px; margin: 22px 0 10px; }
+  h3 { font-size: 14px; margin: 0 0 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; background: var(--soft); position: sticky; top: 0; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .scroll { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 10px; }
+  pre { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow: auto; font-size: 12px; margin: 0; }
+  .agent { display: flex; flex-direction: column; gap: 6px; }
+  .agent .head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+  .badge.ok { background: rgba(21,128,61,.12); color: var(--ok); }
+  .badge.warn { background: rgba(180,83,9,.12); color: var(--warn); }
+  .badge.bad { background: rgba(185,28,28,.12); color: var(--bad); }
+  .muted { color: var(--muted); }
+  ul.clean { margin: 0; padding-left: 18px; }
+  ul.clean li { margin: 4px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; background: var(--c); vertical-align: -1px; }
+  svg text { fill: var(--muted); font-size: 11px; }
+  .toolbar { display: flex; gap: 10px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .bubble { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 10px; white-space: normal; }
+  .bubble .who { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  @media (max-width: 640px) { .two { grid-template-columns: 1fr; } .right { margin-left: 0; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo" id="logo">--</div>
+    <div class="title">
+      <div class="eco" id="eco"></div>
+      <h1 id="name">Enterprise</h1>
+      <p id="role"></p>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="right">
+      <span class="muted" id="status"><span class="dot"></span>online</span>
+      <label class="muted">View
+        <select id="viewSel"><option value="en">English</option><option value="native">Native terms</option></select>
+      </label>
+      <label class="muted">Role (simulated login)
+        <select id="roleSel"></select>
+      </label>
+      <label class="muted"><input type="checkbox" id="auto" checked> auto-refresh</label>
+      <a id="docs" target="_blank"><button>API docs</button></a>
+    </div>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+<main id="main"></main>
+<script>
+const B = window.__BOOT__ || {};
+document.documentElement.style.setProperty('--accent', B.color || '#2563eb');
+const PALETTE = ['var(--accent)', '#0ea5e9', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#64748b'];
+const TABS = ['Overview', 'AI Agents & Models', 'Ask agent', 'Data Explorer', 'Native API', 'Governance', 'Audit Log'];
+const QUIET_TABS = ['Data Explorer', 'Ask agent'];   // no auto-refresh while the user reads or types
+let state = { tab: 'Overview', meta: null, table: null };
+let GLOSS = {};
+const $ = (s, r = document) => r.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const fmt = v => typeof v === 'number' ? v.toLocaleString('en-US', {maximumFractionDigits: 2}) : esc(v);
+async function api(path, opts) { const r = await fetch(path, opts); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k + '-' + B.id); localStorage.setItem(k + '-' + B.id, v); } catch (e) { return null; } }
+const role = () => store('role') || '';
+const view = () => store('view') || 'en';
+
+// ---------- English view: deterministic translation of native (Bahasa) terms ----------
+function T(v) {
+  if (view() !== 'en' || typeof v !== 'string') return v;
+  if (GLOSS[v] !== undefined) return GLOSS[v];
+  if (v.includes(', ') && v.split(', ').every(x => GLOSS[x] !== undefined)) return v.split(', ').map(x => GLOSS[x]).join(', ');
+  if (/^[\[{]/.test(v)) return v.replace(/"([A-Za-z_]+)":/g, (m, k) => `"${GLOSS[k] || k}":`).replace(/"([^"]+)"/g, (m, s) => GLOSS[s] ? `"${GLOSS[s]}"` : m);
+  return v;
+}
+function deepT(o) {
+  if (view() !== 'en') return o;
+  if (Array.isArray(o)) return o.map(deepT);
+  if (o && typeof o === 'object') return Object.fromEntries(Object.entries(o).map(([k, v]) => [T(k), deepT(v)]));
+  return T(o);
+}
+function viewTable(t) {
+  if (!t || !t.columns) return t;
+  const cols = t.columns, keep = [], names = [];
+  cols.forEach((c, i) => {
+    if (view() === 'en') {
+      if (cols.includes(c + '_en')) return;                 // native free text replaced by its English twin
+      keep.push(i); names.push(c.endsWith('_en') ? T(c.slice(0, -3)) : T(c));
+    } else if (!c.endsWith('_en')) { keep.push(i); names.push(c); }
+  });
+  return {columns: names, rows: t.rows.map(r => keep.map(i => T(r[i])))};
+}
+function md(text) {   // minimal, safe markdown for LLM answers: escape first, then bold / line breaks / bullets
+  return esc(text).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^[-*] (.*)$/gm, '&bull; $1').replace(/\n/g, '<br>');
+}
+
+function chart(c) {
+  const W = 620, H = 230, L = 46, R = 10, Tp = 12, Bm = 28, n = c.labels.length;
+  const bars = c.series.filter(s => s.type === 'bar'), lines = c.series.filter(s => s.type !== 'bar');
+  const stacked = !!c.stacked || (bars.length > 1 && c.title.toLowerCase().includes('critical'));
+  let max = 0;
+  for (let i = 0; i < n; i++) {
+    const b = stacked ? bars.reduce((a, s) => a + (+s.values[i] || 0), 0) : Math.max(0, ...bars.map(s => +s.values[i] || 0));
+    max = Math.max(max, b, ...lines.map(s => +s.values[i] || 0));
+  }
+  max = max <= 0 ? 1 : max * 1.1;
+  const x = i => L + (W - L - R) * (i + .5) / n, y = v => Tp + (H - Tp - Bm) * (1 - v / max), bw = (W - L - R) / n * .7;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = max * k / 4; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`; }
+  c.labels.forEach((lab, i) => { g += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${esc(lab)}</text>`; });
+  const colorOf = {}; c.series.forEach((s, k) => colorOf[s.name] = PALETTE[k % PALETTE.length]);
+  for (let i = 0; i < n; i++) {
+    let base = 0;
+    bars.forEach((s, k) => {
+      const v = +s.values[i] || 0;
+      if (stacked) { g += `<rect x="${x(i) - bw / 2}" y="${y(base + v)}" width="${bw}" height="${Math.max(0, y(base) - y(base + v))}" fill="${colorOf[s.name]}" rx="2"><title>${esc(s.name)}: ${fmt(v)}</title></rect>`; base += v; }
+      else { const w = bw / bars.length; g += `<rect x="${x(i) - bw / 2 + k * w}" y="${y(v)}" width="${w - 1}" height="${Math.max(0, y(0) - y(v))}" fill="${colorOf[s.name]}" rx="2"><title>${esc(s.name)}: ${fmt(v)}</title></rect>`; }
+    });
+  }
+  lines.forEach(s => {
+    g += `<polyline points="${s.values.map((v, i) => `${x(i)},${y(+v || 0)}`).join(' ')}" fill="none" stroke="${colorOf[s.name]}" stroke-width="2"/>`;
+    s.values.forEach((v, i) => g += `<circle cx="${x(i)}" cy="${y(+v || 0)}" r="2.5" fill="${colorOf[s.name]}"><title>${esc(s.name)}: ${fmt(v)}</title></circle>`);
+  });
+  const legend = c.series.map(s => `<span style="--c:${colorOf[s.name]}">${esc(s.name)}</span>`).join('');
+  return `<div class="card"><h3>${esc(c.title)} <span class="muted">(${esc(c.unit)})</span></h3><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(c.title)}">${g}</svg><div class="legend">${legend}</div></div>`;
+}
+
+function tableHtml(t) {
+  if (!t || !t.columns.length) return '<p class="muted">No rows.</p>';
+  const head = t.columns.map(c => `<th>${esc(c)}</th>`).join('');
+  const rows = t.rows.map(r => '<tr>' + r.map(v => `<td class="${typeof v === 'number' ? 'num' : ''}">${fmt(v)}</td>`).join('') + '</tr>').join('');
+  return `<div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+async function renderOverview() {
+  const [kpis, charts] = await Promise.all([api('/ui/kpis'), api('/ui/charts')]);
+  const p = state.meta.profile;
+  return `<div class="grid kpis">${kpis.map(k => `<div class="card kpi"><div class="label">${esc(k.label)}</div><div class="value">${esc(T(k.value))}</div></div>`).join('')}</div>
+  <h2>Live charts</h2><div class="grid two">${charts.map(chart).join('')}</div>
+  <h2>Business goal</h2><div class="card">${esc(p.business_goal)}</div>
+  <div class="grid two" style="margin-top:14px">
+    <div class="card"><h3>Users and roles (U<sub>i</sub>)</h3><table><tr><th>Role</th><th>Can</th></tr>${p.users.map(u => `<tr><td>${esc(u.role)}</td><td>${esc(u.can)}</td></tr>`).join('')}</table></div>
+    <div class="card"><h3>Modules (M<sub>i</sub>)</h3><table><tr><th>Module</th><th>Feature</th><th>Model / algorithm</th></tr>${p.modules.map(m => `<tr><td>${esc(m.name)}</td><td>${esc(m.feature)}</td><td>${esc(m.model)}</td></tr>`).join('')}</table></div>
+  </div>`;
+}
+
+async function renderAgents() {
+  const agents = await api('/ui/agents');
+  const cards = agents.map(a => {
+    let bdi = '';
+    if (a.bdi) {
+      const desires = deepT(a.bdi.desires), intents = a.bdi.intentions;
+      bdi = `<details open><summary>Beliefs, desires, intentions</summary>
+        <h3 style="margin-top:8px">Beliefs</h3><pre>${esc(JSON.stringify(deepT(a.bdi.beliefs), null, 2))}</pre>
+        <h3 style="margin-top:8px">Desires</h3><ul class="clean">${desires.map(d => `<li><b>${esc(d.id)}</b> (priority ${d.priority}) ${esc(T(d.description))}</li>`).join('')}</ul>
+        <h3 style="margin-top:8px">Recent intentions</h3>${tableHtml(viewTable({columns: ['rencana', 'tujuan', 'event', 'status'], rows: intents.map(i => [i.rencana, i.tujuan, i.event, i.status])}))}</details>`;
+    }
+    const cls = a.status === 'active' ? 'ok' : '';
+    return `<div class="card agent"><div class="head"><h3>${esc(a.name)}</h3><span class="badge ${cls}">${esc(a.status)}</span></div>
+      <div class="muted">${esc(a.id)}</div><div><span class="chip">${esc(a.paradigm)}</span></div>
+      <div>${esc(a.detail)}</div><div class="muted">last: ${esc(T(a.last_event) || '-')} ${esc(a.last_ts || '')}</div>${bdi}</div>`;
+  }).join('');
+  const p = state.meta.profile, lang = state.meta.language_label || p.language;
+  return `<div class="card" style="margin-bottom:14px"><b>Agent paradigm:</b> ${esc(p.paradigm)}<br><b>AI models:</b> ${p.models.map(esc).join('; ')}<br>
+    <b>Own LLM:</b> ${esc(p.llm_vendor || '-')} <span class="muted">(${esc(p.llm_model || '-')})</span>. ${esc(p.llm_why || '')}<br>
+    <b>Working language:</b> ${esc(lang)}. The agent writes its messages to other agents in ${esc(lang)}. Messages from other agents, in any language, are understood by this agent's own LLM (faithful translation into ${esc(lang)}, FIPA-ACL act, intent), and every number is checked. If this LLM is unavailable or out of free quota, Groq, then Gemini, then OpenRouter take over. Binding decisions stay with the model above.</div>
+    <div class="grid two">${cards}</div>`;
+}
+
+async function historyHtml() {
+  const hist = await api('/agent/history');
+  const plain = s => String(s ?? '').replace(/\*\*|__|`/g, '');
+  const rows = hist.slice(0, 30).map(h => [h.ts, h.mode, h.sender, h.language || '', plain(h.question), plain(h.understood), plain(h.answer), h.model || '-']);
+  return tableHtml({columns: ['time', 'mode', 'from', 'in', 'message received', 'understood as (own language)', 'reply sent', 'LLM'], rows});
+}
+
+async function renderAsk() {
+  const agentName = state.meta.profile.agents[0].name;
+  return `<div class="grid two">
+    <div class="card"><h3>Ask the ${esc(agentName)} (any language)</h3>
+      <p class="muted">You are an internal user (${esc(role() || 'no role')}): the agent may use this enterprise's private data. Other enterprises' agents only get answers without private data.</p>
+      <textarea id="q" rows="3" placeholder="e.g. Why did you accept Rp1,741? / Kenapa usulan DR kita parsial?"></textarea>
+      <div class="toolbar"><label>Answer in <select id="lang"><option value="auto">same language as the question</option><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="jv">Javanese</option></select></label>
+        <button class="primary" id="askBtn">Ask</button></div>
+      <div id="answers"></div></div>
+    <div class="card"><h3>Recent conversations of this agent (dashboard, other agents, round tables)</h3><div id="histBox">${await historyHtml()}</div></div></div>`;
+}
+
+async function renderData() {
+  const tables = await api('/ui/tables');
+  if (!state.table || !tables.includes(state.table)) state.table = tables[0];
+  const t = await api('/ui/table/' + encodeURIComponent(state.table) + '?limit=100');
+  return `<div class="toolbar"><label>Local dataset (D<sub>i</sub>) <select id="tableSel">${tables.map(n => `<option value="${esc(n)}" ${n === state.table ? 'selected' : ''}>${esc(T(n))}</option>`).join('')}</select></label>
+    <span class="muted">Storage: ${esc(state.meta.profile.database)}. Only this enterprise can read these tables.${view() === 'en' ? ' Showing English terms.' : ''}</span></div>${tableHtml(viewTable(t))}`;
+}
+
+async function renderNative() {
+  const ex = await api('/ui/native');
+  const p = state.meta.profile;
+  const sem = Object.entries(p.semantics).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  const fields = [...new Set(ex.flatMap(e => [...e.body.matchAll(/"([a-z_]+)":/g)].map(m => m[1])))].filter(f => GLOSS[f]);
+  const trans = fields.length ? `<h2>English meaning of the native field names</h2><div class="card">${tableHtml({columns: ['native field', 'English'], rows: fields.map(f => [f, GLOSS[f]])})}</div>` : '';
+  return `<div class="grid two"><div class="card"><h3>Native protocol (P<sub>i</sub>)</h3><p>${esc(p.protocol)}</p><p class="muted">Content type: ${esc(p.content_type)}</p>
+    <p><a href="/.well-known/agent-card.json" target="_blank">A2A-style agent card</a> &middot; <a href="/docs" target="_blank">OpenAPI docs</a></p>
+    <p class="muted">Plus the shared A2A conversational endpoint POST /a2a (JSON-RPC message/send) for natural-language agent communication.</p></div>
+    <div class="card"><h3>Data semantics (D<sub>i</sub>)</h3><table>${sem}</table><p class="note">The orchestrator maps these semantics to the canonical model D* (kWh per hourly slot, Rp/kWh, ISO 8601 +07:00).</p></div></div>
+    <h2>Examples of the native wire format (shown as-is, native terms)</h2><div class="grid">${ex.map(e => `<div class="card"><h3>${esc(e.title)}</h3><pre>${esc(e.body)}</pre></div>`).join('')}</div>${trans}`;
+}
+
+async function renderGov() {
+  const p = state.meta.profile, env = state.meta.environment;
+  return `<div class="grid two"><div class="card"><h3>Governance policies (G<sub>i</sub>)</h3><ul class="clean">${p.governance.map(g => `<li>${esc(g)}</li>`).join('')}</ul></div>
+    <div class="card"><h3>Simulation harness: current world state</h3><table>${Object.entries(env).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(JSON.stringify(v))}</td></tr>`).join('')}</table>
+    <p class="note">Set by the Control Center scenarios. Agents never read this directly; they perceive its effects (weather, faults, demand).</p></div></div>
+    <div class="card" style="margin-top:14px"><h3>Platform (T<sub>i</sub>)</h3>${esc(p.platform)}<br><span class="muted">Representation only: every enterprise runs locally on its own port and process.</span></div>`;
+}
+
+async function renderAudit() {
+  const rows = await api('/ui/audit?limit=150');
+  return tableHtml({columns: ['ts', 'level', 'actor', 'event', 'detail'], rows: rows.map(r => [r.ts, r.level, r.actor, T(r.event), T(JSON.stringify(r.detail))])});
+}
+
+async function renderApprovals() {
+  const list = await api('/ui/approvals');
+  const isMgr = role() === 'Energy Manager';
+  const rows = list.map(a => {
+    const pending = a.status === 'MENUNGGU';
+    const cls = a.status === 'DISETUJUI' ? 'ok' : a.status === 'DITOLAK' ? 'bad' : 'warn';
+    const btns = pending ? `<button class="primary" data-act="approve" data-id="${esc(a._id)}" ${isMgr ? '' : 'disabled'}>Approve</button> <button data-act="reject" data-id="${esc(a._id)}" ${isMgr ? '' : 'disabled'}>Reject</button>` : esc(a.diputuskan_oleh || '');
+    const reason = view() === 'en' ? (a.alasan_en || a.alasan) : a.alasan;
+    return `<tr><td>${esc(a.event_id)}</td><td class="num">${fmt(a.total_kwh)}</td><td class="num">${fmt(a.harga_rp_per_kwh)}</td><td><span class="badge ${cls}">${esc(T(a.status))}</span></td><td>${esc(reason)}</td><td>${btns}</td></tr>`;
+  }).join('');
+  return `<div class="card"><h3>Demand-response approvals (human-in-the-loop)</h3>
+    <p class="muted">Required role: Energy Manager. Current simulated role: <b>${esc(role() || 'none')}</b>.</p>
+    <table><tr><th>Event</th><th>kWh</th><th>Rp/kWh</th><th>Status</th><th>Reason</th><th>Decision</th></tr>${rows || '<tr><td colspan="6" class="muted">No approvals.</td></tr>'}</table>
+    <p class="note">After deciding, use "Sync approvals" in the Global Control Center so the orchestrator updates the run status.</p></div>`;
+}
+
+const RENDER = {'Overview': renderOverview, 'AI Agents & Models': renderAgents, 'Ask agent': renderAsk,
+  'Data Explorer': renderData, 'Native API': renderNative, 'Governance': renderGov, 'Audit Log': renderAudit,
+  'Approvals': renderApprovals};
+
+async function ask() {
+  const q = $('#q').value.trim(); if (!q) return;
+  const box = $('#answers'), btn = $('#askBtn');
+  btn.disabled = true;
+  box.insertAdjacentHTML('afterbegin', `<div class="bubble" id="pending"><div class="who">you</div>${esc(q)}<div class="muted">thinking ...</div></div>`);
+  try {
+    const r = await api('/agent/ask', {method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({question: q, language: $('#lang').value, role: role()})});
+    $('#pending').outerHTML = `<div class="bubble"><div class="who">you</div>${esc(q)}</div><div class="bubble"><div class="who">${esc(r.agent)} &middot; ${esc(r.provider)}:${esc(r.model || 'fallback')} &middot; ${fmt(r.latency_ms)} ms</div>${md(r.answer)}</div>`;
+    $('#q').value = '';
+    try { $('#histBox').innerHTML = await historyHtml(); } catch (e) { /* history refresh is best effort */ }
+  } catch (e) { $('#pending').outerHTML = `<div class="bubble">Error: ${esc(e.message)}</div>`; }
+  btn.disabled = false;
+}
+
+async function render() {
+  try {
+    state.meta = await api('/ui/meta');
+    $('#status').innerHTML = '<span class="dot"></span>online' + (state.meta.environment.outage ? ' (simulated outage)' : '');
+    $('#main').innerHTML = await RENDER[state.tab]();
+    const sel = $('#tableSel'); if (sel) sel.onchange = e => { state.table = e.target.value; render(); };
+    const askBtn = $('#askBtn'); if (askBtn) { askBtn.onclick = ask; $('#q').onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ask(); }; }
+    document.querySelectorAll('button[data-act]').forEach(b => b.onclick = async () => {
+      try { await api('/ui/approvals/' + b.dataset.id, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({decision: b.dataset.act, role: role(), note: 'decided in IndustriPrima dashboard'})}); render(); }
+      catch (e) { alert(e.message); }
+    });
+  } catch (e) {
+    $('#status').innerHTML = '<span class="dot down"></span>error';
+    $('#main').innerHTML = `<div class="card">Could not load data: ${esc(e.message)}</div>`;
+  }
+}
+
+async function init() {
+  const [meta, gloss] = await Promise.all([api('/ui/meta'), api('/ui/glossary').catch(() => ({translations: {}}))]);
+  state.meta = meta; GLOSS = gloss.translations || {};
+  const p = meta.profile;
+  document.title = p.name + ' | ' + (B.ecosystem || 'ecosystem');
+  $('#eco').innerHTML = `<img class="eco-mark" src="/brand/shakti-tantra-mark.svg" alt=""><b>${esc(B.ecosystem || '')}</b> ecosystem member <span title="${esc(B.ecosystem_meaning || '')}">(sistem energi)</span>`
+    + (B.control_center ? ` &middot; <a href="${esc(B.control_center)}" target="_blank">Control Center</a>` : '');
+  $('#logo').textContent = p.initials; $('#name').textContent = p.name; $('#role').textContent = p.role;
+  $('#docs').href = '/docs';
+  const llmShort = (p.llm_model || '-').split(':').slice(1).join(':').split('/').pop() || p.llm_model || '-';
+  $('#chips').innerHTML = [['Platform', p.platform], ['DB', p.database], ['Protocol', p.protocol.split(' (')[0]], ['Agent paradigm', p.paradigm.split(' (')[0]], ['Language', meta.language_label || p.language || '-'], ['Own LLM', llmShort + (p.llm_vendor ? ' · ' + p.llm_vendor.split(' (')[0] : '')]]
+    .map(([k, v]) => `<span class="chip">${k}: <b>${esc(v)}</b></span>`).join('');
+  const roles = p.users.map(u => u.role);
+  if (!roles.includes(role())) store('role', roles[0]);
+  $('#roleSel').innerHTML = roles.map(r => `<option ${r === role() ? 'selected' : ''}>${esc(r)}</option>`).join('');
+  $('#roleSel').onchange = e => { store('role', e.target.value); render(); };
+  $('#viewSel').value = view();
+  $('#viewSel').onchange = e => { store('view', e.target.value); render(); };
+  const tabs = TABS.concat(meta.has_approvals ? ['Approvals'] : []);
+  $('#tabs').innerHTML = tabs.map(t => `<button class="${t === state.tab ? 'active' : ''}">${t}</button>`).join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
+    state.tab = b.textContent; $('#tabs').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); render();
+  });
+  await render();
+  setInterval(() => { if ($('#auto').checked && !QUIET_TABS.includes(state.tab)) render(); }, 5000);
+}
+init();
+</script>
+</body>
+</html>
