@@ -266,6 +266,9 @@ already ran keep the plan in execution, and only the remaining hours are re-plan
    data), then ask the Explainer Agent "Why does SolarGreen pay the balancing cost?".
 8. **Evaluation** tab: cost, flexibility and KPIs across all runs. **Glossary (EN)** explains every term.
 
+For the full team presentation (who presents what, a 20-step script with the expected numbers, troubleshooting,
+likely questions and a quiz), see [docs/STUDY_GUIDE.md](docs/STUDY_GUIDE.md).
+
 ## 7. Tests
 
 `python -m pytest -q` runs 51 tests (the LLM is switched off or mocked in all of them, so they need no network or keys):
@@ -302,7 +305,7 @@ smart-energy-ecosystem/
 ├── frontend/          enterprise.html (dashboard shell), control_center.py (Streamlit), brand/ (logo SVGs)
 ├── scripts/           generate_data.py, run_all.py, demo_cli.py
 ├── tests/             unit + end-to-end tests
-├── docs/ARCHITECTURE.md
+├── docs/              ARCHITECTURE.md (specification), STUDY_GUIDE.md (demo and study guide), img/
 └── data/              generated per-enterprise databases (created by generate_data.py)
 ```
 
