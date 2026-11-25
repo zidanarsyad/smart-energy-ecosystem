@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -31,6 +32,18 @@ SERVICES = [
     ("industriprima", "enterprises.industriprima.app:app"),
     ("batteryflex", "enterprises.batteryflex.app:app"),
 ]
+
+
+def _port_in_use(port: int) -> bool:
+    """Bind HOST:port the way uvicorn and Streamlit will; if that fails, another process holds the port."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        if os.name != "nt":  # as uvicorn/tornado do on Unix: ignores TIME_WAIT, still fails on a live server
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind((HOST, port))
+        except OSError:
+            return True
+    return False
 
 
 def _wait_healthy(name: str, port: int, proc: subprocess.Popen, timeout: float = 120.0) -> None:
@@ -57,6 +70,18 @@ def main() -> None:
     parser.add_argument("--no-ui", action="store_true", help="do not start the Streamlit control center")
     parser.add_argument("--regenerate", action="store_true", help="regenerate all synthetic data first")
     args = parser.parse_args()
+
+    # Check the ports first. A second copy would otherwise regenerate the data under the running one, and its
+    # health checks would pass against the old servers before its own servers fail to bind.
+    wanted = [(ENTERPRISE_NAMES[name], ENTERPRISE_PORTS[name]) for name, _ in SERVICES]
+    wanted.append(("Ecosystem Orchestrator", ORCHESTRATOR_PORT))
+    if not args.no_ui:
+        wanted.append(("Global Control Center", UI_PORT))
+    busy = [f"  {port}  {label}" for label, port in sorted(wanted, key=lambda w: w[1]) if _port_in_use(port)]
+    if busy:
+        sys.exit(f"Cannot start {ECOSYSTEM_NAME}: these ports are already in use:\n" + "\n".join(busy) + "\n"
+                 "An earlier run_all is probably still running. Stop it with Ctrl+C in its terminal,\n"
+                 "or end the leftover python processes, then run this again.")
 
     if args.regenerate or not (DATA_DIR / "generation_summary.json").exists():
         subprocess.run([sys.executable, str(ROOT / "scripts" / "generate_data.py")], check=True, cwd=ROOT)

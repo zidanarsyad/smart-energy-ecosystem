@@ -125,7 +125,7 @@ Keep talking and name what happened: most failures show a design feature at work
 | The run stays AWAITING_APPROVAL after approving | The approval was not synced yet | Click **Sync approvals from IndustriPrima**. Only the role Energy Manager can approve. |
 | A red dot in the sidebar, or "orchestrator offline" | A server process stopped | Press Ctrl+C in the `run_all` terminal and start it again (about a minute). With one enterprise down, a run still finishes on its last good data, derated 20% and flagged. |
 | `Activate.ps1` fails with "running scripts is disabled" | PowerShell execution policy | Run `Set-ExecutionPolicy -Scope Process Bypass` first, or call `.\.venv\Scripts\python.exe scripts\run_all.py` directly. |
-| "is port 8201 already in use?" at start-up | An earlier `run_all` is still running | Close that terminal, or end the leftover `python.exe` processes in Task Manager. |
+| "these ports are already in use" at start-up | An earlier `run_all` is still running | Close that terminal, or end the leftover `python.exe` processes in Task Manager. |
 | Dashboards still show clouds or a fault after the demo | The last run left a disrupted world | Click **Reset world to normal** in the sidebar. |
 
 ## Architecture at a glance
